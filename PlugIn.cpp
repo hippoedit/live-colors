@@ -5,12 +5,12 @@
 #include "PlugIn.h"
 
 #ifndef CLR_NONE
-    #define CLR_NONE                0xFFFFFFFFL
-    #define CLR_DEFAULT             0xFF000000L
+#define CLR_NONE                0xFFFFFFFFL
+#define CLR_DEFAULT             0xFF000000L
 #endif
 
 #ifndef RGBA
-    #define RGBA(r, g, b, a)    MAKELONG(MAKEWORD(r, g), MAKEWORD(b, a))
+#define RGBA(r, g, b, a)    MAKELONG(MAKEWORD(r, g), MAKEWORD(b, a))
 #endif
 
 STDMETHODIMP CLiveColors::GetInfo(BSTR* psDescription, BSTR* psAuthor, BSTR* psEmail, BSTR* psHomepage)
