@@ -19,5 +19,5 @@ STDAPI DllCanUnloadNow()
 
 STDAPI DllGetPluginFactory(LPVOID* ppv)
 {
-	return CPluginFactoryExt::CreateInstanceEx()->QueryInterface(__uuidof(IPluginFactory), ppv);
+    return CPluginFactoryExt::CreateInstanceEx()->QueryInterface(__uuidof(IPluginFactory), ppv);
 }
