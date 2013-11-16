@@ -9,5 +9,13 @@ Following color definition are recognized:
 - Web color definitions as _#afc_
 - C/C++ macros for color definition as _RGB(255,0,255)_  or _RGBA(0xFF,0x00,0xFF, 0xAF)_
 
-More infor can be found on HippoEDIT wiki:
+For example this is how it looks like for CSS file in HippoEDIT:
+
+![In-code color visualization for CSS](/img/css_color_preview.png)
+
+or for C++ file:
+
+![In-code color visualization for C++](/img/cpp_color_preview.png)
+
+More info can be found on HippoEDIT wiki:
 http://wiki.hippoedit.com/plugins/live-colors
