@@ -1,4 +1,4 @@
-live-colors
+Live Colors plug-in for HippoEDIT
 ===========
 
 Live Colors plug-in is an example binary plug-in for [HippoEDIT](http://www.hippoedit.com), that visualize color values directly in code, using underline or background color equal to typed color value. 
