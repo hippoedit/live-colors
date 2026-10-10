@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.hippoedit.com/xml/package-info">
+<package-info xmlns="http://www.hippoedit.com/xml/package-info" xmlns:smf="http://www.hippoedit.com/">
+	<id>FC52F539-8F7A-4145-8E33-01E8371D82E2</id>
+	<name>Live Colors</name>
+	<name>Live Colors</name>
+	<version>1.0.0.8</version>
+	<required>1.51.30</required>
+	<description>Show color values for HEX or RGB defined colors inline in source code</description>
+	<author>HippoEDIT.com</author>
+	<email>supportbox@hippoedit.com</email>
+	<homepage>http://wiki.hippoedit.com/plugins/live-colors</homepage>
+	<memo></memo>
+
+	<!-- Common Install actions -->
+	<install architecture="*" unicode="*" pdb="*">
+		<!-- Read me -->
+		<readme type="inline">This will install Live Colors plugin for HippoEDIT.</readme>
+	</install>
+
+	<!-- x32 Unicode Install actions -->
+	<install architecture="x32" unicode="true">
+		<require-file name="x32u/LiveColors.dll" destination="%{plugins}%/livecolors.dll" />
+	</install>
+	<install architecture="x32" unicode="true" pdb="true">
+		<require-zip name="x32u/LiveColors.pdb.zip" destination="%{plugins}%" />
+	</install>
+
+	<!-- x32 Non-Unicode Install actions -->
+	<install architecture="x32" unicode="false">
+		<require-file name="x32/LiveColors.dll" destination="%{plugins}%/livecolors.dll" />
+	</install>
+	<install architecture="x32" unicode="false" pdb="true">
+		<require-zip name="x32/LiveColors.pdb.zip" destination="%{plugins}%" />
+	</install>
+
+	<!-- x64 Install actions -->
+	<install architecture="x64">
+		<require-file name="x64/LiveColors.dll" destination="%{plugins}%/livecolors.dll" />
+	</install>
+	<install architecture="x64" pdb="true">
+		<!-- PDB files -->
+		<require-zip name="x64/LiveColors.pdb.zip" destination="%{plugins}%" />
+	</install>
+
+	<install architecture="*" unicode="*" pdb="*">
+		<!-- Registration -->
+		<install-plugin path="%{plugins}%/livecolors.dll"/>
+	</install>
+
+	<!-- Uninstall actions -->
+	<uninstall architecture="*" unicode="*" pdb="*">
+		<!-- Read me -->
+		<readme type="inline">This will uninstall Live Colors plugin for HippoEDIT.</readme>
+
+		<!-- Un-Registration -->
+		<uninstall-plugin id="FC52F539-8F7A-4145-8E33-01E8371D82E2"/>
+
+		<!-- Remove binaries -->
+		<remove-file name="%{plugins}%/livecolors.dll" />
+		<remove-file name="%{plugins}%/livecolors.pdb" />
+	</uninstall>
+
+</package-info>
