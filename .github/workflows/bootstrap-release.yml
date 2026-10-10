@@ -1,0 +1,98 @@
+name: Bootstrap Live Colors Release
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/bootstrap-release.yml
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout source owner
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Import and verify legacy binary distribution
+        run: |
+          set -euo pipefail
+          base='https://www.hippoedit.com/download/plugins/live_colors'
+          root="$RUNNER_TEMP/live-colors-1.0.0.8"
+          rm -rf "$root"
+          mkdir -p "$root/x32" "$root/x32u" "$root/x64"
+
+          curl --fail --silent --show-error --location --user-agent 'HippoEDIT-GitHub-Actions/1.0' "$base/package-info.xml" --output "$root/package-info.xml"
+          curl --fail --silent --show-error --location --user-agent 'HippoEDIT-GitHub-Actions/1.0' "$base/x32/LiveColors.dll" --output "$root/x32/LiveColors.dll"
+          curl --fail --silent --show-error --location --user-agent 'HippoEDIT-GitHub-Actions/1.0' "$base/x32/livecolors.pdb.zip" --output "$root/x32/livecolors.pdb.zip"
+          curl --fail --silent --show-error --location --user-agent 'HippoEDIT-GitHub-Actions/1.0' "$base/x32u/LiveColors.dll" --output "$root/x32u/LiveColors.dll"
+          curl --fail --silent --show-error --location --user-agent 'HippoEDIT-GitHub-Actions/1.0' "$base/x32u/livecolors.pdb.zip" --output "$root/x32u/livecolors.pdb.zip"
+          curl --fail --silent --show-error --location --user-agent 'HippoEDIT-GitHub-Actions/1.0' "$base/x64/LiveColors.dll" --output "$root/x64/LiveColors.dll"
+          curl --fail --silent --show-error --location --user-agent 'HippoEDIT-GitHub-Actions/1.0' "$base/x64/livecolors.pdb.zip" --output "$root/x64/livecolors.pdb.zip"
+
+          python3 - "$root" <<'PY'
+          from hashlib import sha1
+          from pathlib import Path
+          import sys
+
+          root = Path(sys.argv[1])
+          expected = {
+              'package-info.xml': 'c1bfad89d6142405b798135de668ff76f9546e01',
+              'x32/LiveColors.dll': '57d27cbd4db7f1dbe696173ed2367b5cea0649bf',
+              'x32/livecolors.pdb.zip': 'cc9ef4c4877dc1548163e494f5683b1253050e6f',
+              'x32u/LiveColors.dll': '9003298eab4088da11df9f206f95575b43ab8915',
+              'x32u/livecolors.pdb.zip': '278066a16888e12d833627eff050297b7bbb21b1',
+              'x64/LiveColors.dll': 'c9ef4b8a85728a3987bbc3b9826d89f904ba098d',
+              'x64/livecolors.pdb.zip': '26a9ef3461a33cbb8869b03911f738bd5f6f6652',
+          }
+          for relative, expected_sha in expected.items():
+              data = (root / relative).read_bytes()
+              actual = sha1(f'blob {len(data)}\0'.encode() + data).hexdigest()
+              if actual != expected_sha:
+                  raise SystemExit(f'Legacy payload mismatch for {relative}: {actual} != {expected_sha}')
+          print('All legacy Live Colors payload blobs match the website snapshot.')
+          PY
+
+      - name: Build exact Release asset
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/live-colors-1.0.0.8"
+          asset="$RUNNER_TEMP/live-colors-1.0.0.8.zip"
+          python3 - "$root" "$asset" <<'PY'
+          from pathlib import Path
+          import sys
+          import zipfile
+
+          root = Path(sys.argv[1])
+          asset = Path(sys.argv[2])
+          files = sorted(path for path in root.rglob('*') if path.is_file())
+          with zipfile.ZipFile(asset, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as package:
+              for path in files:
+                  relative = path.relative_to(root).as_posix()
+                  info = zipfile.ZipInfo(relative, date_time=(2000, 1, 1, 0, 0, 0))
+                  info.compress_type = zipfile.ZIP_DEFLATED
+                  info.external_attr = 0o100644 << 16
+                  package.writestr(info, path.read_bytes(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
+          PY
+          sha256sum "$asset"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view 'v1.0.0.8' >/dev/null 2>&1; then
+            echo 'Release v1.0.0.8 already exists; refusing to replace it.' >&2
+            exit 1
+          fi
+          target=$(git rev-parse HEAD^)
+          gh release create 'v1.0.0.8' \
+            "$RUNNER_TEMP/live-colors-1.0.0.8.zip#live-colors-1.0.0.8.zip" \
+            --target "$target" \
+            --title 'Live Colors 1.0.0.8' \
+            --notes 'Bootstrap of the existing HippoEDIT Live Colors 1.0.0.8 binary distribution. Payload imported from the legacy website downloads and verified byte-for-byte by Git blob SHA; no binary rebuild was performed.'
